@@ -4,8 +4,7 @@
 *.tfstate.*
 .terraform.lock.hcl
 
-# Sensitive files
-*.tfvars
+
 
 # OS / IDE
 .vscode/
