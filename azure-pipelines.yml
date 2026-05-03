@@ -1,0 +1,101 @@
+trigger:
+  branches:
+    include:
+      - "*"
+
+variables:
+  workingDirectory: 'Environment/dev'
+  serviceConnection: 'pipeconnection'
+
+stages:
+
+- stage: Init
+  jobs:
+    - job: InitJob
+      steps:
+        - checkout: self
+
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: TerraformTaskV4@4
+          displayName: "Terraform Init"
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            commandOptions: '-reconfigure'
+            workingDirectory: '$(workingDirectory)'
+            backendServiceArm: '$(serviceConnection)'
+            backendAzureRmResourceGroupName: 'devbackendrg'
+            backendAzureRmStorageAccountName: 'rakshdevbackend'
+            backendAzureRmContainerName: 'backup'
+            backendAzureRmKey: 'dev.tfstate'
+
+- stage: Plan
+  dependsOn: Init
+  jobs:
+    - job: PlanJob
+      steps:
+        - checkout: self
+
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: TerraformTaskV4@4
+          displayName: "Terraform Init (Plan)"
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            commandOptions: '-reconfigure'
+            workingDirectory: '$(workingDirectory)'
+            backendServiceArm: '$(serviceConnection)'
+            backendAzureRmResourceGroupName: 'devbackendrg'
+            backendAzureRmStorageAccountName: 'rakshdevbackend'
+            backendAzureRmContainerName: 'backup'
+            backendAzureRmKey: 'dev.tfstate'
+
+        - task: TerraformTaskV4@4
+          displayName: "Terraform Plan"
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(workingDirectory)'
+            environmentServiceNameAzureRM: '$(serviceConnection)'
+            commandOptions: '-var-file=terraform.tfvars'
+
+- stage: Apply
+  dependsOn: Plan
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+
+  jobs:
+    - job: ApplyJob
+      steps:
+        - checkout: self
+
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: TerraformTaskV4@4
+          displayName: "Terraform Init (Apply)"
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            commandOptions: '-reconfigure'
+            workingDirectory: '$(workingDirectory)'
+            backendServiceArm: '$(serviceConnection)'
+            backendAzureRmResourceGroupName: 'devbackendrg'
+            backendAzureRmStorageAccountName: 'rakshdevbackend'
+            backendAzureRmContainerName: 'backup'
+            backendAzureRmKey: 'dev.tfstate'
+
+        - task: TerraformTaskV4@4
+          displayName: "Terraform Apply"
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(workingDirectory)'
+            environmentServiceNameAzureRM: '$(serviceConnection)'
+            commandOptions: '-auto-approve -var-file=terraform.tfvars'
