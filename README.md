@@ -13,31 +13,7 @@ This project demonstrates end-to-end infrastructure automation by deploying an A
 ________________________________________
 🏗️ Architecture
 Developer → GitHub → Azure DevOps Pipeline → Terraform → Azure (RG → VNet → AKS)
-________________________________________
-📁 Project Structure
-Bootcamproj2/
-│
-├── Environment/
-│   └── dev/
-│       ├── main.tf
-│       ├── variable.tf
-│       ├── backend.tf
-│       ├── terraform.tfvars
-│
-├── module/
-│   ├── resourcegrp/
-│   ├── vnet/
-│   ├── aks/
-│
-├── azure-pipelines.yml
-└── .gitignore
-________________________________________
-⚙️ Azure Setup
-Resource	Value
-Resource Group	dev-rg
-Backend RG	devbackendrg
-Storage Account	rakshdevbackend
-Container	backup
+
 ________________________________________
 🔐 Service Principal
 Created using:
